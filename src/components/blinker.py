@@ -1,17 +1,16 @@
 import utime
 import machine
-import singletons
 
 
 class Blinker:
-    def __init__(self, timeout=2):
+    def __init__(self, pin, timeout=2):
         self.timeout = timeout
-        self.pico = singletons.Pico.instance()
-        self.pico.gp19.init(machine.Pin.OUT)
+        self.pin = pin
+        self.pin.init(machine.Pin.OUT)
 
     def blink(self):
-        self.pico.gp19.value(1)
+        self.pin.value(1)
         utime.sleep(self.timeout)
-        self.pico.gp19.value(0)
+        self.pin.value(0)
         utime.sleep(self.timeout)
 

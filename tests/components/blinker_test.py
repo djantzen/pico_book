@@ -1,11 +1,13 @@
 import unittest
 import components
+import singletons
 
 
 class BlinkerTest(unittest.TestCase):
 
     def test_something(self):
-        b = components.Blinker()
+        pico = singletons.Pico.instance()
+        b = components.Blinker(pico.gp19)
         self.assertIsNotNone(b)
         self.assertEqual(True, True)  # add assertion here
 
