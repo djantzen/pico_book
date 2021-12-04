@@ -4,7 +4,7 @@ import components
 clock_tower = singletons.ClockTower.instance()
 pico = singletons.Pico.instance()
 button = components.Button(pico.gp10)
-blinker = components.Blinker(pico.gp19)
+blinker = components.Blinker(pico.gp25)
 
 start_time_in_sec = clock_tower.now()
 
