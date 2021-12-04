@@ -5,10 +5,15 @@ import singletons
 
 class BlinkerTest(unittest.TestCase):
 
-    def test_something(self):
+    def test_blink_once(self):
         pico = singletons.Pico.instance()
-        b = components.Blinker(pico.gp19)
-        self.assertIsNotNone(b)
+        b = components.Blinker(pico.gp25, 0)
+        b.blink()
+
+        self.assertEqual(pico.gp25.events[0].old_value, None)
+        self.assertEqual(pico.gp25.events[0].new_value, b'1')
+        self.assertEqual(pico.gp25.events[1].old_value, b'1')
+        self.assertEqual(pico.gp25.events[1].new_value, b'0')
         self.assertEqual(True, True)  # add assertion here
 
 
