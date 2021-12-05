@@ -11,7 +11,11 @@ class Buzzer:
 
     def buzz(self):
         for i in range(10):
-            self.pin.value(1)
-            utime.sleep(1)
-            self.pin.value(0)
+            self._oscillate(50)
             utime.sleep(0.5)
+
+    def _oscillate(self, duration):
+        for i in range(duration):
+            self.pin.value(1)
+            utime.sleep_ms(3)
+            self.pin.value(0)
