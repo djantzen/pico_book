@@ -3,7 +3,9 @@ import components
 import singletons
 
 pico = singletons.Pico.instance()
-potentiometer = components.Potentiometer(pico.gp26_adc0)
+potentiometer = components.Potentiometer(pico.adc_0_gp26)
+led = pico.pwm_7b_gp15
+led.freq(1000)
 
 
 def converter(reading):
@@ -12,5 +14,5 @@ def converter(reading):
 
 while True:
     print(potentiometer.read_u16(converter))
-    utime.sleep(2)
+    led.duty_u16(potentiometer.read_u16())
 

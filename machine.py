@@ -1,8 +1,15 @@
 #
 
+
 class ADC:
     def __init__(self, pin):
         ...
+
+
+class PWM:
+    def __init__(self, pin):
+        ...
+
 
 class PinEvent:
     def __init__(self, old_value, new_value):
