@@ -31,12 +31,11 @@ class Pico:
     gp26 = machine.Pin(26)
     gp27 = machine.Pin(27)
     gp28 = machine.Pin(28)
-    # The following may need to be lazily evaluated if they
-    # alter behavior of the underlying pin
+    # Note if a pin is used directly it cannot also be used when wrapped in an ADC/PWM
     adc_0_gp26 = machine.ADC(gp26)
     adc_1_gp27 = machine.ADC(gp27)
     adc_2_gp28 = machine.ADC(gp28)
-    adc_4_gp28 = machine.ADC(4)
+    adc_4_onboard = machine.ADC(4)
     pwm_0a_gp0 = machine.PWM(gp0)
     pwm_0b_gp1 = machine.PWM(gp1)
     pwm_1a_gp2 = machine.PWM(gp2)
