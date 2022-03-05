@@ -1,8 +1,10 @@
-#
 
 
 class ADC:
     def __init__(self, pin):
+        ...
+
+    def read_u16(self):
         ...
 
 
@@ -10,11 +12,18 @@ class PWM:
     def __init__(self, pin):
         ...
 
+    def duty_ns(self, ns):
+        ...
+
+    def freq(self, freq):
+        ...
+
 
 class PinEvent:
     def __init__(self, old_value, new_value):
         self.old_value = old_value
         self.new_value = new_value
+
 
 class Pin:
     IN = "in"
