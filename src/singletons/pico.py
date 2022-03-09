@@ -7,6 +7,9 @@ class Pico:
     _instance = None
 
     def __init__(self):
+        self._is_initialized = False
+
+    def _initialize(self):
         self.gp0 = machine.Pin(0)
         self.gp1 = machine.Pin(1)
         self.gp2 = machine.Pin(2)
@@ -38,7 +41,7 @@ class Pico:
         self.adc_channel_map = {
             '0': self.gp26,
             '1': self.gp27,
-            '2': self.gp26,
+            '2': self.gp28,
             '4': 4  # Pin doesn't have ADC capabilities
         }
 
@@ -62,23 +65,29 @@ class Pico:
         }
 
         self.pin_usage_map = {}
+        self._is_initialized = True
 
     @classmethod
     def pin_id(cls, pin: machine.Pin):
-        s = str(pin)[4:6]
-        m = re.search(r'\d+', s)
-        return m.group(0)
+        m = re.search(r'\d+', str(pin))
+        return int(m.group(0))
 
     def assert_free_pin(self, pin):
+        self.assert_initialized()
         usage = self.pin_usage_map.get(self.pin_id(pin))
         if usage is not None:
             raise Exception("Pin {pin} is already in use as a {usage}".format(pin=str(pin), usage=usage))
+
+    def assert_initialized(self):
+        if not self._is_initialized:
+            raise Exception("Pico singleton not initialized, constructor called directly")
 
     def reserve_pin(self, pin, usage='RAW'):
         self.pin_usage_map[self.pin_id(pin)] = usage
         return pin
 
     def adc(self, channel, reservation="ADC"):
+        self.assert_initialized()
         if str(channel) not in (['0', '1', '2', '4']):
             raise ValueError("Channel {channel} is invalid".format(channel=channel))
         pin = self.adc_channel_map.get(str(channel))
@@ -87,6 +96,9 @@ class Pico:
         return machine.ADC(pin)
 
     def pwm(self, channel, location='low', reservation="PWM"):
+        self.assert_initialized()
+        if self.pwm_channel_map.get(channel) is None:
+            raise ValueError("Unknown PWM channel {}".format(channel))
         if location != 'low' and location != 'high':
             raise ValueError("Pin location must be 'low' or 'high' to specify e.g., channel 0A pin 0 versus 16")
         position = 0
@@ -95,7 +107,7 @@ class Pico:
 
         pin = self.pwm_channel_map.get(channel)[position]
         if pin is None:
-            raise Exception("No corresponding Pin for {channel}".format(channel=channel))
+            raise Exception("No corresponding Pin for {channel} location {location}".format(channel=channel,location=location))
         self.assert_free_pin(pin)
         self.reserve_pin(pin, reservation)
         return machine.PWM(pin)
@@ -104,6 +116,7 @@ class Pico:
     def instance(cls):
         if cls._instance is None:
             cls._instance = Pico()
+            cls._instance._initialize()
         return cls._instance
 
     def __str__(self):

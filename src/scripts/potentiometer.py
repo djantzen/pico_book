@@ -3,8 +3,8 @@ import components
 import singletons
 
 pico = singletons.Pico.instance()
-potentiometer = components.Potentiometer(pico.adc_0_gp26)
-led = pico.pwm_7b_gp15
+potentiometer = components.Potentiometer(pico.adc("0", "Potentiometer ADC"))
+led = pico.pwm("7B", "LED PWM")
 led.freq(1000)
 
 

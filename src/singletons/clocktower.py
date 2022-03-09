@@ -6,16 +6,12 @@ class ClockTower:
     _instance = None
     _now = None
 
-    def __init__(self):
-        ...
-#        raise RuntimeWarning("Call 'instance'()")
-
     @classmethod
-    def instance(klass):
-        if klass._instance is None:
-            klass._instance = ClockTower()
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = ClockTower()
 
-        return klass._instance
+        return cls._instance
 
     def now(self):
         return utime.time() if self._now is None else self._now

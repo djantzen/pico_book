@@ -5,18 +5,10 @@ import singletons
 
 class ButtonTest(unittest.TestCase):
 
-    def test_press_once(self):
-        ...
-        # pico = singletons.Pico.instance()
-        # b = components.Button(pico.gp19, 0)
-        # b.blink()
-        #
-        # self.assertEqual(pico.gp19.events[0].old_value, None)
-        # self.assertEqual(pico.gp19.events[0].new_value, b'1')
-        # self.assertEqual(pico.gp19.events[1].old_value, b'1')
-        # self.assertEqual(pico.gp19.events[1].new_value, b'0')
-        # self.assertEqual(True, True)  # add assertion here
+    def test_is_pressed(self):
 
-
-if __name__ == '__main__':
-    unittest.main()
+        pico = singletons.Pico.instance()
+        b = components.Button(pico.reserve_pin(pico.gp19, "Button"))
+        self.assertFalse(b.is_pressed())
+        pico.gp19.value(1)
+        self.assertTrue(b.is_pressed())
