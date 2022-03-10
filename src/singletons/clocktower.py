@@ -16,5 +16,5 @@ class ClockTower:
     def now(self):
         return utime.time() if self._now is None else self._now
 
-    def set_now(self, now):
+    def setNow(self, now):
         self._now = now

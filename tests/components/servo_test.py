@@ -3,6 +3,10 @@ import components
 import singletons
 
 
+def clear_pico():
+    singletons.Pico._instance = None
+
+
 class ServoTest(unittest.TestCase):
 
     def test_degrees_to_pulse(self):

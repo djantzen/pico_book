@@ -1,22 +1,21 @@
 import unittest
-
 import machine
 import singletons
 
 
+def clear_pico():
+    singletons.Pico._instance = None
+
+
 class PicoTest(unittest.TestCase):
 
-    @classmethod
-    def clearPico(cls):
-        singletons.Pico._instance = None
-
     def test_fetch_instance(self):
-        self.clearPico()
+        clear_pico()
         p = singletons.Pico.instance()
         self.assertIsNotNone(p)
 
     def test_adc(self):
-        self.clearPico()
+        clear_pico()
         p = singletons.Pico.instance()
         adc_zero = p.adc("0")
         adc_one = p.adc("1")
@@ -34,7 +33,7 @@ class PicoTest(unittest.TestCase):
         self.assertIsInstance(adc_four, machine.ADC)
 
     def test_pwm(self):
-        self.clearPico()
+        clear_pico()
         p = singletons.Pico.instance()
         try:
             p.pwm("A0")
