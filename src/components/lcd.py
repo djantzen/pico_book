@@ -24,8 +24,8 @@ import utime
 
 class LCD:
 
-    CHR = 1  # Character mode
-    CMD = 0  # Command mode
+    CHARACTER_MODE = 1  # Character mode
+    COMMAND_MODE = 0  # Command mode
     CHARS = 16  # Characters per line (16 max)
     LINE_1 = 0x80  # LCD memory location for 1st line
     LINE_2 = 0xC0  # LCD memory location 2nd line
@@ -45,22 +45,23 @@ class LCD:
         self.d6_pin.init(machine.Pin.OUT)
         self.d7_pin.init(machine.Pin.OUT)
 
-        self.send_bits(0x33, LCD.CMD)  # Initialize
-        self.send_bits(0x32, LCD.CMD)  # Set to 4-bit mode
-        self.send_bits(0x06, LCD.CMD)  # Cursor move direction
-        self.send_bits(0x0C, LCD.CMD)  # Turn cursor off
-        self.send_bits(0x28, LCD.CMD)  # 2 line display
-        self.send_bits(0x01, LCD.CMD)  # Clear display
-        utime.sleep(0.0005)  # Delay to allow commands to process
+        self.send_bits(0x33, LCD.COMMAND_MODE)  # Initialize
+        self.send_bits(0x32, LCD.COMMAND_MODE)  # Set to 4-bit mode
+        self.send_bits(0x06, LCD.COMMAND_MODE)  # Cursor move direction
+        self.send_bits(0x0C, LCD.COMMAND_MODE)  # Turn cursor off
+        self.send_bits(0x28, LCD.COMMAND_MODE)  # 2 line display
+        self.send_bits(0x01, LCD.COMMAND_MODE)  # Clear display
+        utime.sleep(0.0005)  # Delay allows commands to process
 
     def send_bits(self, bits, mode):
+
         # High bits
         self.rs_pin.value(mode)
-
         self.d4_pin.value(0)
         self.d5_pin.value(0)
         self.d6_pin.value(0)
         self.d7_pin.value(0)
+
         if bits & 0x10 == 0x10:
             self.d4_pin.value(1)
         if bits & 0x20 == 0x20:
@@ -91,13 +92,13 @@ class LCD:
         self.lcd_toggle_enable()
 
     def write(self, message, line):
-        self.send_bits(line, LCD.CMD)
+        self.send_bits(line, LCD.COMMAND_MODE)
 
         for i in range(LCD.CHARS):
             if i < len(message):
-                self.send_bits(ord(message[i]), LCD.CHR)
+                self.send_bits(ord(message[i]), LCD.CHARACTER_MODE)
             else:
-                self.send_bits(ord(" "), LCD.CHR)
+                self.send_bits(ord(" "), LCD.CHARACTER_MODE)
 
     def lcd_toggle_enable(self):
         utime.sleep(0.0005)

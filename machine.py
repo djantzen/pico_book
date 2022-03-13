@@ -13,6 +13,9 @@ class PinEvent:
     def set_id(self, event_id):
         self.event_id = event_id
 
+    def __str__(self):
+        return "Event {} with old value {}, new value {}".format(self.event_id, self.old_value, self.new_value)
+
 
 class StateTrackable:
     def __init__(self):
@@ -38,6 +41,9 @@ class StateTrackable:
         self.events.reverse()
         return first
 
+    def __str__(self):
+        return "{}".format(self.events)
+
 
 class Pin(StateTrackable):
 
@@ -60,12 +66,13 @@ class Pin(StateTrackable):
 
     def value(self, value=None):
         if value is None:
-            return 1 if self.mock_value == b"1" else 0
-        event = PinEvent(self.mock_value, (b"1" if value else b"0"))
+            return self.mock_value
+        event = PinEvent(self.mock_value, value)
         self.record_event(event)
         self.mock_value = event.new_value
 
     def __str__(self):
+        # Do not change the first 7 characters or it will break code to retrieve pin id
         return "Pin({}, mode=ALT, pull=PULL_DOWN, alt=31)".format(self.id)
 
 

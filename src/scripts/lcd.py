@@ -52,6 +52,6 @@ except KeyboardInterrupt:
 
 finally:
     print("finally")
-    lcd.send_bits(0x01, LCD.CMD)
+    lcd.send_bits(0x01, LCD.COMMAND_MODE)
     lcd.write("So long!", LCD.LINE_1)
     lcd.write("MBTechWorks.com", LCD.LINE_2)
