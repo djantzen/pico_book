@@ -19,48 +19,114 @@ class LCDTest(unittest.TestCase):
                                   d6_pin=pico.reserve_pin(pico.gp4, "LCD D6"),
                                   d7_pin=pico.reserve_pin(pico.gp5, "LCD D7"))
 
-    def test_initialization(self):
+    def test_setup(self):
         self.before()
+        self.lcd.configure()
         for i in range(1, 7):
             self.assertEqual(self.lcd.rs_pin.get_event(i).new_value, components.LCD.COMMAND_MODE)
 
-        # 0x33
-        self.assertEqual(self.lcd.d5_pin.get_event(2).new_value, 1)
-        self.assertEqual(self.lcd.d4_pin.get_event(2).new_value, 1)
-        self.assertEqual(self.lcd.d5_pin.get_event(4).new_value, 1)
-        self.assertEqual(self.lcd.d4_pin.get_event(4).new_value, 1)
+    def test_initialize(self):
+        self.before()
+        self.lcd.initialize()
+        self.assertEqual(self.lcd.d5_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d4_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d5_pin.get_event(3).new_value, 1)
+        self.assertEqual(self.lcd.d4_pin.get_event(3).new_value, 1)
 
-        # 0x32
-        self.assertEqual(self.lcd.d5_pin.get_event(6).new_value, 1)
-        self.assertEqual(self.lcd.d4_pin.get_event(6).new_value, 1)
-        self.assertEqual(self.lcd.d5_pin.get_event(8).new_value, 1)
+    def test_set_four_bit_mode(self):
+        self.before()
+        self.lcd.set_four_bit_mode()
+        self.assertEqual(self.lcd.d5_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d4_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d5_pin.get_event(2).new_value, 0)
+        self.assertEqual(self.lcd.d5_pin.get_event(3).new_value, 1)
 
-        # for i in range(15):
-        #     print("---------------")
-        #     print(self.lcd.d7_pin.get_event(i))
+    def test_set_cursor_move_direction(self):
+        self.before()
+        self.lcd.set_cursor_move_direction()
+        self.assertEqual(self.lcd.d5_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d6_pin.get_event(1).new_value, 1)
 
-        # 0x06
-        self.assertEqual(self.lcd.d5_pin.get_event(11).new_value, 1)
-        self.assertEqual(self.lcd.d6_pin.get_event(7).new_value, 1)
+    def test_turn_cursor_off(self):
+        self.before()
+        self.lcd.set_cursor_off()
+        self.assertEqual(self.lcd.d6_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d7_pin.get_event(1).new_value, 1)
 
-        # 0x0c
-        self.assertEqual(self.lcd.d6_pin.get_event(10).new_value, 1)
-        self.assertEqual(self.lcd.d7_pin.get_event(9).new_value, 1)
+    def test_two_line_display(self):
+        self.before()
+        self.lcd.set_two_line_display()
+        self.assertEqual(self.lcd.d5_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d7_pin.get_event(1).new_value, 1)
 
+    def test_clear_display(self):
+        self.before()
+        self.lcd.clear_display()
+        self.assertEqual(self.lcd.d4_pin.get_event(1).new_value, 1)
 
     def test_line_one_message(self):
         self.before()
-#        self.lcd.write("Tests are good.", components.LCD.LINE_1)
-        self.lcd.write("T", components.LCD.LINE_1)
-        # 84, 101, 115, 116, 115, 32, 97, 32, 103, 48, 48, 100, 46
-        # print(ord("T"))
-        # for i in range(25):
-        #     print(self.lcd.rs_pin.get_event(i))
-        self.assertEqual(self.lcd.rs_pin.get_event(8).new_value, components.LCD.CHARACTER_MODE)
-        self.assertEqual(self.lcd.d6_pin.get_event(18).new_value, 1)  # high bits
-        self.assertEqual(self.lcd.d4_pin.get_event(20).new_value, 1)
-        self.assertEqual(self.lcd.d6_pin.get_event(19).new_value, 0)  # low bits
-        self.assertEqual(self.lcd.d6_pin.get_event(20).new_value, 1)
-        # 128 64 32 16    8 4 2 1
+        self.lcd.configure()
+        self.lcd.write("Tests are good.", components.LCD.LINE_1)
 
-        # 84 high 4, 1. low 4 -- x40 x10 x04, pins d6, d4, e_pin 1, e_pin 0, d6
+        self.assertEqual(self.lcd.rs_pin.get_event(7).new_value, components.LCD.COMMAND_MODE)
+        self.assertEqual(self.lcd.rs_pin.get_event(8).new_value, components.LCD.CHARACTER_MODE)
+        self.assertEqual(self.lcd.d6_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d4_pin.get_event(1).new_value, 1)
+
+    def test_line_two_message(self):
+        self.before()
+        self.lcd.configure()
+        self.lcd.write("Tests are good.", components.LCD.LINE_2)
+
+        self.assertEqual(self.lcd.rs_pin.get_event(7).new_value, components.LCD.COMMAND_MODE)
+        self.assertEqual(self.lcd.rs_pin.get_event(8).new_value, components.LCD.CHARACTER_MODE)
+        self.assertEqual(self.lcd.d7_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d6_pin.get_event(1).new_value, 1)
+
+        d4_high_char = '0'  # 48 (d5 and d4)
+        d5_high_char = ' '  # 32 (d5)
+        d6_high_char = '@'  # 64 (d6)
+        d7_high_char = 'Ç'  # 128 (d7)
+        d4_low_char = '3'   # 51 (d5h, d4h, d5l, d4l)
+        d5_low_char = '*'   # 42 (d5h, d7l, d5l)
+        d6_low_char = '8'   # 56 (d5h, d4h, d7l)
+        d7_low_char = '$'   # 36 (d5h, d6l)
+
+    def test_d5_and_d4_high_pins_4_bit(self):
+        self.before()
+        d4_high_char = '0'  # decimal 48 (d5 and d4)
+        self.lcd.write(d4_high_char, components.LCD.LINE_1)
+        self.assertEqual(self.lcd.d5_pin.get_event(1).new_value, 1)
+        self.assertEqual(self.lcd.d4_pin.get_event(1).new_value, 1)
+
+    def test_d6_high_pin_4_bit(self):
+        self.before()
+        d6_high_char = '@'  # 64 (d6)
+        self.lcd.write(d6_high_char, components.LCD.LINE_1)
+        self.assertEqual(self.lcd.d6_pin.get_event(1).new_value, 1)
+
+    def test_d6_low_pin_4_bit(self):
+        self.before()
+        d6_low_char = '$'  # 36 (d5h, d6l)
+        self.lcd.write(d6_low_char, components.LCD.LINE_1)
+        self.assertEqual(self.lcd.d6_pin.get_event(1).new_value, 1)
+
+    def test_d7_high_pin_4_bit(self):
+        self.before()
+        d7_high_char = 'Ç'  # 128 (d7)
+        self.lcd.write(d7_high_char, components.LCD.LINE_1)
+        self.assertEqual(self.lcd.d7_pin.get_event(1).new_value, 1)
+
+    def test_d7_low_pin_4_bit(self):
+        self.before()
+        d7_low_char = '('
+        self.lcd.write(d7_low_char, components.LCD.LINE_1)
+        self.assertEqual(self.lcd.d7_pin.get_event(1).new_value, 1)
+
+    def test_d4_d5_low_pins_4_bit(self):
+        self.before()
+        d7_low_char = '3'  # 51 (d5h, d4h, d5l, d4l)
+        self.lcd.write(d7_low_char, components.LCD.LINE_1)
+        self.assertEqual(self.lcd.d5_pin.get_event(3).new_value, 1)
+        self.assertEqual(self.lcd.d4_pin.get_event(3).new_value, 1)

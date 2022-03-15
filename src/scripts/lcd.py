@@ -10,7 +10,7 @@ lcd = LCD(rs_pin=pico.reserve_pin(pico.gp0, "LCD RS"),
           d5_pin=pico.reserve_pin(pico.gp3, "LCD D5"),
           d6_pin=pico.reserve_pin(pico.gp4, "LCD D6"),
           d7_pin=pico.reserve_pin(pico.gp5, "LCD D7"))
-
+lcd.configure()
 knob = pico.adc('0', reservation="Potentiometer ADC")
 pwm_seven_b = pico.pwm('7B', reservation="Servo controller PWM")
 servo = Servo(pwm_seven_b)

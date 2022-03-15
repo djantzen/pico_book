@@ -45,51 +45,83 @@ class LCD:
         self.d6_pin.init(machine.Pin.OUT)
         self.d7_pin.init(machine.Pin.OUT)
 
-        self.send_bits(0x33, LCD.COMMAND_MODE)  # Initialize
-        self.send_bits(0x32, LCD.COMMAND_MODE)  # Set to 4-bit mode
-        self.send_bits(0x06, LCD.COMMAND_MODE)  # Cursor move direction
-        self.send_bits(0x0C, LCD.COMMAND_MODE)  # Turn cursor off
-        self.send_bits(0x28, LCD.COMMAND_MODE)  # 2 line display
-        self.send_bits(0x01, LCD.COMMAND_MODE)  # Clear display
+        self.high_bit_map = {
+            128: self.d7_pin,
+            64: self.d6_pin,
+            32: self.d5_pin,
+            16: self.d4_pin,
+        }
+        self.low_bit_map = {
+            8: self.d7_pin,
+            4: self.d6_pin,
+            2: self.d5_pin,
+            1: self.d4_pin
+        }
+
+    def configure(self):
+        self.initialize()
+        self.set_four_bit_mode()
+        self.set_cursor_off()
+        self.set_cursor_move_direction()
+        self.set_two_line_display()
+        self.clear_display()
         utime.sleep(0.0005)  # Delay allows commands to process
+
+    def initialize(self):
+        # Command is decimal 51
+        self.send_bits(0x33, LCD.COMMAND_MODE)
+
+    def set_four_bit_mode(self):
+        # Command is decimal 50
+        self.send_bits(0x32, LCD.COMMAND_MODE)
+
+    def set_cursor_move_direction(self):
+        # Command is decimal 6
+        self.send_bits(0x06, LCD.COMMAND_MODE)
+
+    def set_cursor_off(self):
+        # Command is decimal 12
+        self.send_bits(0x0C, LCD.COMMAND_MODE)
+
+    def set_two_line_display(self):
+        # Command is decimal 40
+        self.send_bits(0x28, LCD.COMMAND_MODE)
+
+    def clear_display(self):
+        self.send_bits(0x01, LCD.COMMAND_MODE)
+
+    def _select_pins(self, bits, pin_map):
+        for key in pin_map.keys():
+            pin = pin_map.get(key & bits)
+            if pin is not None:
+                pin.value(1)
 
     def send_bits(self, bits, mode):
 
         # High bits
         self.rs_pin.value(mode)
-        self.d4_pin.value(0)
-        self.d5_pin.value(0)
-        self.d6_pin.value(0)
-        self.d7_pin.value(0)
-
-        if bits & 0x10 == 0x10:
-            self.d4_pin.value(1)
-        if bits & 0x20 == 0x20:
-            self.d5_pin.value(1)
-        if bits & 0x40 == 0x40:
-            self.d6_pin.value(1)
-        if bits & 0x80 == 0x80:
-            self.d7_pin.value(1)
+        self._clear_pins()
+        self._select_pins(bits, self.high_bit_map)
 
         # Toggle 'Enable' pin
         self.lcd_toggle_enable()
 
         # Low bits
-        self.d4_pin.value(0)
-        self.d5_pin.value(0)
-        self.d6_pin.value(0)
-        self.d7_pin.value(0)
-        if bits & 0x01 == 0x01:
-            self.d4_pin.value(1)
-        if bits & 0x02 == 0x02:
-            self.d5_pin.value(1)
-        if bits & 0x04 == 0x04:
-            self.d6_pin.value(1)
-        if bits & 0x08 == 0x08:
-            self.d7_pin.value(1)
+        self._clear_pins()
+        self._select_pins(bits, self.low_bit_map)
 
         # Toggle 'Enable' pin
         self.lcd_toggle_enable()
+
+    def _clear_pins(self):
+        if self.d4_pin.value() is not None and self.d4_pin.value() > 0:
+            self.d4_pin.value(0)
+        if self.d5_pin.value() is not None and self.d5_pin.value() > 0:
+            self.d5_pin.value(0)
+        if self.d6_pin.value() is not None and self.d6_pin.value() > 0:
+            self.d6_pin.value(0)
+        if self.d7_pin.value() is not None and self.d7_pin.value() > 0:
+            self.d7_pin.value(0)
 
     def write(self, message, line):
         self.send_bits(line, LCD.COMMAND_MODE)
