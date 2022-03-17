@@ -1,7 +1,5 @@
-import _thread
-
-import utime
 import machine
+import singletons
 
 
 class Blinker:
@@ -19,7 +17,7 @@ class Blinker:
 
     def blink(self):
         self.on()
-        utime.sleep(self.timeout)
+        singletons.ClockTower.instance().sleep(self.timeout)
         self.off()
-        utime.sleep(self.delay)
+        singletons.ClockTower.instance().sleep(self.delay)
 
