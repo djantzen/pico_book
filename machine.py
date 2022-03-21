@@ -1,6 +1,7 @@
 """
-Classes to assist with testing
-
+Classes to assist with testing. PinEvent is a simple container of old and new values. StateTrackable is a
+base class that records a series of state changes described as PinEvents. Pin, PWM and ADC are mocks that
+extend StateTrackable.
 """
 
 

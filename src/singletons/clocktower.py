@@ -1,3 +1,8 @@
+"""
+The ClockTower is the single source of truth for time in the system. This enhances testability by allowing
+test suites to set values for current time and sleep durations
+"""
+
 import utime
 
 

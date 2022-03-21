@@ -19,7 +19,8 @@ import utime
 # 15: LCD Backlight +5V
 # 16: LCD Backlight GND
 
-# https://www.mbtechworks.com/projects/drive-an-lcd-16x2-display-with-raspberry-pi.html
+# Based on:
+#   https://www.mbtechworks.com/projects/drive-an-lcd-16x2-display-with-raspberry-pi.html
 
 
 class LCD:

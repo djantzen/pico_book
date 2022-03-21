@@ -1,3 +1,7 @@
+"""
+Represents the single Pico MCU.
+"""
+
 import machine
 import re
 
