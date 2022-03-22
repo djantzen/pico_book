@@ -21,10 +21,12 @@ class ClockTower:
 
         return cls._instance
 
+    @property
     def now(self):
         return utime.time() if self._now is None else self._now
 
-    def set_now(self, now):
+    @now.setter
+    def now(self, now):
         self._now = now
 
     def set_sleep_duration(self, duration_in_seconds):
