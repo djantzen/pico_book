@@ -9,10 +9,10 @@ Implementations of the exercises in [Get Started with MicroPython on Raspberry P
 * Support automated unit and functional tests
 * Minimize on-device QA
 
-To achieve these goals, the code is broken out into `components`, `singletons` and `scripts`
-A component is a physical device wired to the Pico using one or more pins. The primary singleton
-is the Pico class, which represents the microcontroller configuration i.e., allocation of pins. 
-Scripts tie different components and singletons together into an executable.
+To achieve these goals, the code is broken out into `components`, `singletons`, `models` and `scripts`
+A component is a physical device wired to the Pico using one or more pins. A model is a collection of components that interact. 
+The primary singleton is the Pico class, which represents the microcontroller configuration i.e., allocation of pins. 
+Scripts tie different components, models and singletons together into an executable.
 
 **Dependencies**
 
@@ -29,7 +29,10 @@ Hardware Used:
 
 **Functional Testing**
 
-To prove correct functioning of `components`, we can write functional tests that
+To prove correct functioning of components and models, we can write functional tests that
 observe the states of IO channels. This is possible by providing mock implementations
 of `machine` classes for `Pin`, `PWM`, and `ADC`
 
+**Running Tests**
+
+`micropython run_tests.py`

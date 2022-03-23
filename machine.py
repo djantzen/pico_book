@@ -103,7 +103,7 @@ class PWM(StateTrackable):
         self.duty_u16_value = None
         self.freq_value = None
 
-    def duty_ns(self, duty_ns_value):
+    def duty_ns(self, duty_ns_value=None):
         if duty_ns_value is None:
             next_e = self.next_event()
             if next_e is None:
