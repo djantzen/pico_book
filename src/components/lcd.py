@@ -1,5 +1,5 @@
 import machine
-import utime
+from singletons import ClockTower
 
 # Pinout of the LCD:
 # 1 : GND
@@ -66,30 +66,25 @@ class LCD:
         self.set_cursor_move_direction()
         self.set_two_line_display()
         self.clear_display()
-        utime.sleep(0.0005)  # Delay allows commands to process
+        ClockTower.instance().sleep(0.0005)  # Delay allows commands to process
 
     def initialize(self):
-        # Command is decimal 51
-        self.send_bits(0x33, LCD.COMMAND_MODE)
+        self.send_bits(51, LCD.COMMAND_MODE)
 
     def set_four_bit_mode(self):
-        # Command is decimal 50
-        self.send_bits(0x32, LCD.COMMAND_MODE)
+        self.send_bits(50, LCD.COMMAND_MODE)
 
     def set_cursor_move_direction(self):
-        # Command is decimal 6
-        self.send_bits(0x06, LCD.COMMAND_MODE)
+        self.send_bits(6, LCD.COMMAND_MODE)
 
     def set_cursor_off(self):
-        # Command is decimal 12
-        self.send_bits(0x0C, LCD.COMMAND_MODE)
+        self.send_bits(12, LCD.COMMAND_MODE)
 
     def set_two_line_display(self):
-        # Command is decimal 40
-        self.send_bits(0x28, LCD.COMMAND_MODE)
+        self.send_bits(40, LCD.COMMAND_MODE)
 
     def clear_display(self):
-        self.send_bits(0x01, LCD.COMMAND_MODE)
+        self.send_bits(1, LCD.COMMAND_MODE)
 
     def _select_pins(self, bits, pin_map):
         for key in pin_map.keys():
@@ -134,8 +129,8 @@ class LCD:
                 self.send_bits(ord(" "), LCD.CHARACTER_MODE)
 
     def lcd_toggle_enable(self):
-        utime.sleep(0.0005)
+        ClockTower.instance().sleep(0.0005)
         self.e_pin.value(1)
-        utime.sleep(0.0005)
+        ClockTower.instance().sleep(0.0005)
         self.e_pin.value(0)
-        utime.sleep(0.0005)
+        ClockTower.instance().sleep(0.0005)
