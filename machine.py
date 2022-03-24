@@ -33,15 +33,6 @@ class StateTrackable:
             if e.event_id == event_id:
                 return e
 
-    def next_event(self) -> PinEvent:
-        if len(self.events) == 0:
-            return None
-        # in lieu of 'shift'...
-        self.events.reverse()
-        first = self.events.pop()
-        self.events.reverse()
-        return first
-
     def __str__(self):
         return "{}".format(self.events)
 
@@ -89,10 +80,7 @@ class ADC(StateTrackable):
         self.u16_value = u16_value
 
     def read_u16(self) -> int:
-        next_e = self.next_event()
-        if next_e is None:
-            return None
-        return next_e.new_value
+        return self.u16_value
 
 
 class PWM(StateTrackable):
@@ -105,10 +93,7 @@ class PWM(StateTrackable):
 
     def duty_ns(self, duty_ns_value=None):
         if duty_ns_value is None:
-            next_e = self.next_event()
-            if next_e is None:
-                return None
-            return next_e.new_value
+            return self.duty_ns_value
         else:
             event = PinEvent(old_value=self.duty_ns_value, new_value=duty_ns_value)
             self.record_event(event)
@@ -116,10 +101,7 @@ class PWM(StateTrackable):
 
     def duty_u16(self, duty_u16_value):
         if duty_u16_value is None:
-            next_e = self.next_event()
-            if next_e is None:
-                return None
-            return next_e.new_value
+            return self.duty_u16_value
         else:
             event = PinEvent(old_value=self.duty_u16_value, new_value=duty_u16_value)
             self.record_event(event)
