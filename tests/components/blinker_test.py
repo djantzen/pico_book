@@ -24,4 +24,3 @@ class BlinkerTest(unittest.TestCase):
         self.assertEqual(pico.gp25.get_event(2).old_value, 1)
         self.assertEqual(pico.gp25.get_event(2).new_value, 0)
         self.teardown()
-        
