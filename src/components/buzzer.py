@@ -1,5 +1,5 @@
+import singletons
 from machine import Pin
-import utime
 
 
 class Buzzer:
@@ -12,10 +12,10 @@ class Buzzer:
     def buzz(self):
         for i in range(10):
             self._oscillate(50)
-            utime.sleep(0.5)
+            singletons.ClockTower.instance().sleep(0.5)
 
     def _oscillate(self, duration):
         for i in range(duration):
             self.pin.value(1)
-            utime.sleep_ms(3)
+            singletons.ClockTower.instance().sleep(0.003)
             self.pin.value(0)

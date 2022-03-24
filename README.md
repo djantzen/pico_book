@@ -19,7 +19,8 @@ Scripts tie different components, models and singletons together into an executa
 * Micropython 1.17 or greater
 * [UnitTest](https://pypi.org/project/micropython-unittest/)
 
-Hardware Used:
+**Hardware Used**
+
 * [Towerpro MG92 Microservo](https://www.adafruit.com/product/2307)
 * [LEDs](https://www.adafruit.com/product/4203)
 * [PS1240 Piezo Buzzer](https://www.adafruit.com/product/160)
