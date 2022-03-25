@@ -39,6 +39,9 @@ class StateTrackable:
 
 class Pin(StateTrackable):
 
+    OPEN_DRAIN = 2
+    IRQ_FALLING = 4
+    IRQ_RISING = 8
     IN = "in"
     OUT = "out"
     PULL_UP = 1
@@ -50,6 +53,8 @@ class Pin(StateTrackable):
         self.mock_value = None
         self.dir = dir
         self.pull = None
+        self.irq_falling_handler = None
+        self.irq_rising_handler = None
 
     def init(self, dir="in", pull=None):
         self.mock_value = None
@@ -62,6 +67,19 @@ class Pin(StateTrackable):
         event = PinEvent(self.mock_value, value)
         self.record_event(event)
         self.mock_value = event.new_value
+        if self.irq_rising_handler is not None:
+            if event.old_value is None or event.new_value > event.old_value:
+                self.irq_rising_handler(self)
+        if self.irq_falling_handler is not None:
+            if event.new_value is not None and event.new_value < event.old_value:
+                self.irq_falling_handler(self)
+
+    def irq(self, handler, trigger: int = (IRQ_FALLING | IRQ_RISING | OPEN_DRAIN), priority: int = 1,
+            wake: int = None, hard: bool = False):
+        if trigger & self.IRQ_FALLING:
+            self.irq_falling_handler = handler
+        if trigger & self.IRQ_RISING:
+            self.irq_rising_handler = handler
 
     def __str__(self):
         # Do not change the first 7 characters or it will break code to retrieve pin id
@@ -99,7 +117,7 @@ class PWM(StateTrackable):
             self.record_event(event)
             self.duty_ns_value = duty_ns_value
 
-    def duty_u16(self, duty_u16_value):
+    def duty_u16(self, duty_u16_value=None):
         if duty_u16_value is None:
             return self.duty_u16_value
         else:

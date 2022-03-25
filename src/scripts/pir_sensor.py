@@ -6,8 +6,7 @@ sensor = components.PirSensor(pico.gp28)
 
 
 def handler():
-    if sensor.movement():
-        print("Motion!")
+    print("Motion!")
 
 
-sensor.handle_interrupt(handler=handler)
+sensor.on_movement(handler=handler)

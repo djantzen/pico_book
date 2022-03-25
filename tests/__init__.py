@@ -7,3 +7,4 @@ from .components.potentiometer_test import PotentiometerTest
 from .components.lcd_test import LCDTest
 from .models.servo_controller_test import ServoControllerTest
 from .models.traffic_light_test import TrafficLightTest
+from .components.pir_sensor_test import PirSensorTest
