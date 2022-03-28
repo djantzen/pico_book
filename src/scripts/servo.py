@@ -1,13 +1,14 @@
 import singletons
 import components
 import random
-import utime
 
+runtime = int(input("Run for how many seconds?"))
+clocktower = singletons.ClockTower.instance()
 pico = singletons.Pico.instance()
 servo = components.Servo(pico.pwm("7B"))
 
-for i in range(10):
+while clocktower.not_yet(runtime):
     r = random.randrange(-90, 90)
     print(r)
     servo.set_position(r)
-    utime.sleep(3)
+    clocktower.sleep(3)

@@ -1,12 +1,12 @@
-import utime
+import singletons
 from models import TrafficLight
 
-start_time_in_sec = utime.time()
+runtime = int(input("Run for how many seconds?"))
 
 traffic_light = TrafficLight()
 traffic_light.start()
 
-while utime.time() < start_time_in_sec + 60:
+while singletons.ClockTower.instance().not_yet(runtime):
     traffic_light.cycle()
 
 traffic_light.stop()

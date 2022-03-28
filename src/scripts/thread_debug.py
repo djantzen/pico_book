@@ -1,25 +1,22 @@
 import _thread
-import utime
+import singletons
+
 
 runtime = int(input("Run for how many seconds?"))
 delay = float(input("Delay in seconds for thread loop?"))
-start_time = utime.time()
-stop_time = start_time + runtime
-print("Start time is ", start_time)
-print("Stop time is ", stop_time)
-print("Delay is ", delay)
+clocktower = singletons.ClockTower.instance()
 
 
 def some_thread():
-    print("starting thread")
-    while utime.time() < stop_time:
-        utime.sleep(delay)
+    print("starting child thread with id {}".format(_thread.get_ident()))
+    while clocktower.not_yet(runtime):
+        clocktower.sleep(delay)
     print("exiting")
     return
 
 
 _thread.start_new_thread(some_thread, ())
 
-while utime.time() < stop_time:
-    print("Main loop running")
-    utime.sleep(1)
+while clocktower.not_yet(runtime):
+    print("Main loop running with id {}".format(_thread.get_ident()))
+    clocktower.sleep(1)

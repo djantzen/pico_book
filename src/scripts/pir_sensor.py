@@ -5,7 +5,7 @@ pico = singletons.Pico.instance()
 sensor = components.PirSensor(pico.gp28)
 
 
-def handler():
+def handler(pin):
     print("Motion!")
 
 
