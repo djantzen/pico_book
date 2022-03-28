@@ -18,6 +18,7 @@ Scripts tie different components, models and singletons together into an executa
 
 * Micropython 1.17 or greater
 * [UnitTest](https://pypi.org/project/micropython-unittest/)
+  * Install with `micropython -m upip install unittest`
 
 **Hardware Used**
 
@@ -26,7 +27,7 @@ Scripts tie different components, models and singletons together into an executa
 * [PS1240 Piezo Buzzer](https://www.adafruit.com/product/160)
 * [Potentiometer](https://www.adafruit.com/product/4133)
 * [TinSharp TC1602A LCD](https://www.adafruit.com/product/181)
-* [BS412 PIR Sensor](https://www.adafruit.com/product/4666)
+* [PIR Sensor](https://www.adafruit.com/product/4666)
 
 **Functional Testing**
 
@@ -37,3 +38,7 @@ of `machine` classes for `Pin`, `PWM`, and `ADC`
 **Running Tests**
 
 `micropython run_tests.py`
+
+**Running Scripts**
+
+Within a micropython interactive session `exec(open('scripts/the_script.py').read())`
