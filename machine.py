@@ -42,23 +42,23 @@ class Pin(StateTrackable):
     OPEN_DRAIN = 2
     IRQ_FALLING = 4
     IRQ_RISING = 8
-    IN = "in"
-    OUT = "out"
+    IN = 0
+    OUT = 1
     PULL_UP = 1
     PULL_DOWN = 2
 
-    def __init__(self, id, dir="in"):
+    def __init__(self, id, mode=IN):
         super().__init__()
         self.id = id
         self.mock_value = None
-        self.dir = dir
+        self.mode = mode
         self.pull = None
         self.irq_falling_handler = None
         self.irq_rising_handler = None
 
-    def init(self, dir="in", pull=None):
+    def init(self, mode=IN, pull=None):
         self.mock_value = None
-        self.dir = dir
+        self.mode = mode
         self.pull = pull
 
     def value(self, value=None):
@@ -81,9 +81,39 @@ class Pin(StateTrackable):
         if trigger & self.IRQ_RISING:
             self.irq_rising_handler = handler
 
+    def on(self):
+        self.value(1)
+
+    def off(self):
+        self.value(0)
+
+    def toggle(self):
+        self.value(self.value() - 1) * -1
+
     def __str__(self):
         # Do not change the first 7 characters or it will break code to retrieve pin id
         return "Pin({}, mode=ALT, pull=PULL_DOWN, alt=31)".format(self.id)
+
+
+class Signal:
+
+    def __init__(self, pin: Pin, invert: bool = False):
+        self.pin = pin
+        self.invert = invert
+
+    def value(self, x: int = None):
+        if self.invert:
+            x = (x - 1) * -1
+        self.pin.value(x)
+
+    def on(self):
+        self.pin.on()
+
+    def off(self):
+        self.pin.off()
+
+    def __str__(self):
+        return self.pin.__str__()
 
 
 class ADC(StateTrackable):

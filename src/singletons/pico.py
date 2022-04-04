@@ -90,6 +90,11 @@ class Pico:
         self.pin_usage_map[self.pin_id(pin)] = usage
         return pin
 
+    def signal(self, pin: machine.Pin, invert: bool = False, reservation: str = "Signal"):
+        self.assert_free_pin(pin)
+        self.reserve_pin(pin, reservation)
+        return machine.Signal(pin, invert=invert)
+
     def adc(self, channel, reservation="ADC"):
         self.assert_initialized()
         if str(channel) not in (['0', '1', '2', '4']):
