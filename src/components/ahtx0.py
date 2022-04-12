@@ -1,4 +1,7 @@
 """
+
+Library for the AHT10/20 Humidity and Temperature sensor.
+
 Based on:
   https://github.com/adafruit/Adafruit_CircuitPython_AHTx0/blob/main/adafruit_ahtx0.py
   https://github.com/Chouffy/python_sensor_aht20/blob/main/AHT20.py
@@ -19,6 +22,7 @@ MEASURE_COMMAND = bytes([0xAC, 0x33, 0x00])
 
 class AHTX0:
 
+    """Construct a new sensor, it will soft reset and calibrate if necessary"""
     def __init__(self, i2c: I2C):
         self.i2c = i2c
         self._measurement = bytearray(6)
@@ -36,12 +40,14 @@ class AHTX0:
     def calibrate(self) -> None:
         self.i2c.writeto(I2C_ADDRESS, CALIBRATE_COMMAND)
 
+    """Take a measurement. This must be called prior to 'read()'"""
     def measure(self) -> None:
         self.i2c.writeto(I2C_ADDRESS, MEASURE_COMMAND)
         while self.check_status(IS_BUSY):
             ClockTower.instance().sleep(0.1)
         self._measurement = self.i2c.readfrom(I2C_ADDRESS, 7)
 
+    """Read the last measurement taken. Exception will be thrown if no measurement has been taken"""
     def read(self) -> dict:
         if self._measurement[0] == 0x00:
             raise Exception("Call for a measurement first")
@@ -60,6 +66,7 @@ class AHTX0:
     # Discussion here: https://www.avrfreaks.net/forum/aht20-sensor-and-i2c
     # The data returned from the device contains 2.5 bytes for humidity and 2.5 for temperature. To reconstruct
     # the original value recorded by the device and transmitted, the bits must be shifted into their original places
+    # to reflect the proper integer value prior to transformation
     def _bitshift_humidity(self) -> int:
         # shift first byte 1.5 bytes left, next byte .5 bytes, take least significant 4 bits of the last
         return (self._measurement[1] << 12) | (self._measurement[2] << 4) | (self._measurement[3] >> 4)

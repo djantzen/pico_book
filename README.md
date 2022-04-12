@@ -28,12 +28,13 @@ Scripts tie different components, models and singletons together into an executa
 * [Potentiometer](https://www.adafruit.com/product/4133)
 * [TinSharp TC1602A LCD](https://www.adafruit.com/product/181)
 * [PIR Sensor](https://www.adafruit.com/product/4666)
+* [AHT20 Humidity/Temperature Sensor](https://www.adafruit.com/product/4566)
 
 **Functional Testing**
 
 To prove correct functioning of components and models, we can write functional tests that
 observe the states of IO channels. This is possible by providing mock implementations
-of `machine` classes for `Pin`, `PWM`, and `ADC`
+of `machine` classes for `Pin`, `PWM`, `ADC` and `I2C`
 
 **Running Tests**
 
