@@ -95,6 +95,13 @@ class Pico:
         self.reserve_pin(pin, reservation)
         return machine.Signal(pin, invert=invert)
 
+    def i2c(self, sda: machine.Pin, scl: machine.Pin, reservation="I2C", id: int = 0, freq=400000) -> machine.I2C:
+        self.assert_free_pin(sda)
+        self.assert_free_pin(scl)
+        self.reserve_pin(sda, reservation + " (SDA)")
+        self.reserve_pin(scl, reservation + " (SCL)")
+        return machine.I2C(id, sda=sda, scl=scl, freq=freq)
+
     def adc(self, channel, reservation="ADC"):
         self.assert_initialized()
         if str(channel) not in (['0', '1', '2', '4']):

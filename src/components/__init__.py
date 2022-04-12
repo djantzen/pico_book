@@ -6,3 +6,4 @@ from .potentiometer import Potentiometer
 from .lcd import LCD
 from .servo import Servo
 from .dimmer import Dimmer
+from .ahtx0 import AHTX0

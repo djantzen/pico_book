@@ -95,6 +95,134 @@ class Pin(StateTrackable):
         return "Pin({}, mode=ALT, pull=PULL_DOWN, alt=31)".format(self.id)
 
 
+class I2CMessage:
+    def __init__(self, payload):
+        self.message_id = None
+        self.payload = payload
+
+    def set_message_id(self, message_id):
+        self.message_id = message_id
+
+
+class I2CMessageGenerator:
+
+    def __init__(self):
+        self._messages = {}
+
+    def add(self, addr: int, message: bytes):
+        if addr not in self._messages:
+            self._messages[addr] = list()
+        i2c_message = I2CMessage(payload=message)
+        i2c_message.set_message_id(len(self._messages[addr]) + 1)
+        self._messages[addr].append(i2c_message)
+
+    def next(self, addr: int) -> bytes:
+        # in lieu of shift()...
+        self._messages[addr].reverse()
+        first = self._messages[addr].pop()
+        self._messages[addr].reverse()
+        return first
+
+
+class I2C:
+
+    def __init__(self, id, scl, sda, freq=400000):
+        self.id = id
+        self.scl = scl
+        self.sda = sda
+        self.freq = freq
+        self._generator = I2CMessageGenerator()
+        self._messages = {}
+
+    @property
+    def generator(self):
+        return self._generator
+
+    def get_current_message(self, addr) -> I2CMessage:
+        if addr not in self._messages:
+            raise Exception("No messages yet for {}", addr)
+        max_id = len(self._messages[addr])
+        return self.get_message(addr, max_id)
+
+    def record_message(self, addr, message) -> None:
+        if addr not in self._messages:
+            self._messages[addr] = []
+        max_id = len(self._messages[addr])
+        i2c_message = I2CMessage(message)
+        i2c_message.set_message_id(max_id + 1)
+        self._messages[addr].append(i2c_message)
+
+    def get_message(self, addr, message_id: int):
+        for message in self._messages[addr]:
+            if message.message_id == message_id:
+                return message
+
+    '''Read nbytes from the peripheral specified by addr. If stop is true then a STOP condition is generated at the end of the transfer.
+       Returns a bytes object with the data read.'''
+    def readfrom(self, addr, nbytes, stop=True) -> bytes:
+        if nbytes is None or nbytes < 0:
+            raise ValueError("Nbytes invalid {}").format(nbytes)
+        if self._generator is not None:
+            return self._generator.next(addr).payload[0:nbytes]
+        else:
+            return self.get_current_message(addr).payload[0:nbytes]
+
+    """Read into buf from the peripheral specified by addr. The number of bytes read will be the length of buf.
+       If stop is true then a STOP condition is generated at the end of the transfer. The method returns None."""
+    def readfrom_into(self, addr, buf, stop=True):
+        reading = self.readfrom(addr, buf, stop)
+        for i in range(len(buf)):
+            buf[i] = reading[i]
+
+    """Write the bytes from buf to the peripheral specified by addr. If a NACK is received following the write of a byte 
+       from buf then the remaining bytes are not sent. If stop is true then a STOP condition is generated at the end of 
+       the transfer, even if a NACK is received. The function returns the number of ACKs that were received."""
+    def writeto(self, addr, buf, stop=True) -> int:
+        if buf.__class__ not in (bytearray, bytes, str):
+            raise ValueError("Buf must be bytearray, bytes or string")
+        if buf is None or len(buf) == 0:
+            raise ValueError("Nbytes invalid {}").format(buf)
+        message = None
+        ack_count = 0
+        if buf.__class__ in (bytearray, bytes):
+            message = bytearray(len(buf))
+            for i in range(len(buf)):
+                message[i] = buf[i]
+                ack_count += 1
+        if buf.__class__ is str:
+            message = buf
+            ack_count = 1
+        self.record_message(addr, message)
+        return ack_count
+
+    """Write the bytes contained in vector to the peripheral specified by addr. vector should be a tuple or list of 
+    objects with the buffer protocol. The addr is sent once and then the bytes from each object in vector are written 
+    out sequentially. The objects in vector may be zero bytes in length in which case they don’t contribute to the output.
+    If a NACK is received following the write of a byte from one of the objects in vector then the remaining bytes, and 
+    any remaining objects, are not sent. If stop is true then a STOP condition is generated at the end of the transfer, 
+    even if a NACK is received. The function returns the number of ACKs that were received."""
+    def writevto(self, addr, vector, stop=True):
+        raise NotImplementedError('writevto')
+
+    """Read nbytes from the peripheral specified by addr starting from the memory address specified by memaddr. 
+    The argument addrsize specifies the address size in bits. Returns a bytes object with the data read."""
+    def readfrom_mem(addr, memaddr, nbytes, *, addrsize=8):
+        raise NotImplementedError('readfrom_mem')
+
+    """Read into buf from the peripheral specified by addr starting from the memory address specified by memaddr. 
+    The number of bytes read is the length of buf. The argument addrsize specifies the address size in bits 
+    (on ESP8266 this argument is not recognised and the address size is always 8 bits).
+    The method returns None."""
+    def readfrom_mem_into(addr, memaddr, buf, *, addrsize=8):
+        raise NotImplementedError('readfrom_mem_into')
+
+    """Write buf to the peripheral specified by addr starting from the memory address specified by memaddr. 
+    The argument addrsize specifies the address size in bits (on ESP8266 this argument is not recognised and the address size is always 8 bits).
+    The method returns None."""
+    def writeto_mem(addr, memaddr, buf, *, addrsize=8):
+        raise NotImplementedError('writeto_mem')
+
+
 class Signal:
 
     def __init__(self, pin: Pin, invert: bool = False):
