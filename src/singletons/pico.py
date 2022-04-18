@@ -95,12 +95,21 @@ class Pico:
         self.reserve_pin(pin, reservation)
         return machine.Signal(pin, invert=invert)
 
-    def i2c(self, sda: machine.Pin, scl: machine.Pin, reservation="I2C", id: int = 0, freq=400000) -> machine.I2C:
+    def i2c(self, id: int = 0, *, freq: int = 400000, sda: machine.Pin, scl: machine.Pin, reservation="I2C") -> machine.I2C:
         self.assert_free_pin(sda)
         self.assert_free_pin(scl)
         self.reserve_pin(sda, reservation + " (SDA)")
         self.reserve_pin(scl, reservation + " (SCL)")
         return machine.I2C(id, sda=sda, scl=scl, freq=freq)
+
+    def spi(self, id=0, baudrate=1_000_000, reservation="SPI", *, sck: machine.Pin, mosi: machine.Pin, miso: machine.Pin) -> machine.SPI:
+        self.assert_free_pin(sck)
+        self.assert_free_pin(mosi)
+        self.assert_free_pin(miso)
+        self.reserve_pin(sck, reservation + "(SCK)")
+        self.reserve_pin(miso, reservation + "(MISO)")
+        self.reserve_pin(mosi, reservation + "(MOSI)")
+        return machine.SPI(id=id, sck=sck, mosi=mosi, miso=miso, baudrate=baudrate)
 
     def adc(self, channel, reservation="ADC"):
         self.assert_initialized()

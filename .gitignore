@@ -1,3 +1,4 @@
 .idea
 *.xml
 thonny_venv
+src/secrets.py

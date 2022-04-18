@@ -39,14 +39,15 @@ class ClockTower:
         else:
             utime.sleep(self.sleep_duration)
 
-    def not_yet(self, duration_in_seconds):
+    def not_yet(self, duration_in_seconds, caller: str = "global"):
         calling_thread = _thread.get_ident()
+        caller_id = str(calling_thread) + ':' + caller
         if calling_thread not in self.not_yets:
-            self.not_yets[calling_thread] = self.now
+            self.not_yets[caller_id] = self.now
             return True
         else:
-            if self.now >= self.not_yets[calling_thread] + duration_in_seconds:
-                del(self.not_yets[calling_thread])
+            if self.now >= self.not_yets[caller_id] + duration_in_seconds:
+                del(self.not_yets[caller_id])
                 return False
             else:
                 return True

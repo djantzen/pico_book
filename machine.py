@@ -95,7 +95,7 @@ class Pin(StateTrackable):
         return "Pin({}, mode=ALT, pull=PULL_DOWN, alt=31)".format(self.id)
 
 
-class I2CMessage:
+class BusMessage:
     def __init__(self, payload):
         self.message_id = None
         self.payload = payload
@@ -103,69 +103,140 @@ class I2CMessage:
     def set_message_id(self, message_id):
         self.message_id = message_id
 
+    def __str__(self):
+        return self.payload
 
-class I2CMessageGenerator:
+
+class BusMessageGenerator:
 
     def __init__(self):
         self._messages = {}
 
-    def add(self, addr: int, message: bytes):
+    def add(self, message: bytes, addr: int = 0x00):
         if addr not in self._messages:
             self._messages[addr] = list()
-        i2c_message = I2CMessage(payload=message)
-        i2c_message.set_message_id(len(self._messages[addr]) + 1)
-        self._messages[addr].append(i2c_message)
+        bus_message = BusMessage(payload=message)
+        bus_message.set_message_id(len(self._messages[addr]) + 1)
+        self._messages[addr].append(bus_message)
 
-    def next(self, addr: int) -> bytes:
+    def next(self, addr: int = 0x00) -> bytes:
         # in lieu of shift()...
         self._messages[addr].reverse()
         first = self._messages[addr].pop()
         self._messages[addr].reverse()
         return first
 
+    def has_next(self, addr: int = 0x00) -> bool:
+        return len(self._messages[addr]) > 0
 
-class I2C:
 
-    def __init__(self, id, scl, sda, freq=400000):
-        self.id = id
-        self.scl = scl
-        self.sda = sda
-        self.freq = freq
-        self._generator = I2CMessageGenerator()
+class Bus:
+
+    def __init__(self):
+        self._generator = BusMessageGenerator()
         self._messages = {}
 
     @property
-    def generator(self):
+    def generator(self) -> BusMessageGenerator:
         return self._generator
 
-    def get_current_message(self, addr) -> I2CMessage:
+    def get_current_message(self, addr: int = 0x00) -> BusMessage:
         if addr not in self._messages:
             raise Exception("No messages yet for {}", addr)
         max_id = len(self._messages[addr])
         return self.get_message(addr, max_id)
 
-    def record_message(self, addr, message) -> None:
+    def record_message(self, message, addr:int = 0x00) -> None:
         if addr not in self._messages:
-            self._messages[addr] = []
+            self._messages[addr] = list()
         max_id = len(self._messages[addr])
-        i2c_message = I2CMessage(message)
-        i2c_message.set_message_id(max_id + 1)
-        self._messages[addr].append(i2c_message)
+        bus_message = BusMessage(message)
+        bus_message.set_message_id(max_id + 1)
+        self._messages[addr].append(bus_message)
 
-    def get_message(self, addr, message_id: int):
+    def get_message(self, message_id: int, addr: int = 0x00):
         for message in self._messages[addr]:
             if message.message_id == message_id:
                 return message
+
+
+class SPI(Bus):
+
+    CONTROLLER: int = None
+    LSB: int = 0
+    MSB: int = 1
+
+    def __init__(self, id: int, baudrate: int = 1_000_000, *, polarity: int = 0, phase: int = 0, bits: int = 8,
+                 firstbit: int = MSB, sck: Pin = None, mosi: Pin = None, miso: Pin = None):
+        super().__init__()
+        self._id = id
+        self._baudrate = baudrate
+        self._polarity = polarity
+        self._phase = phase
+        self._bits = bits
+        self._firstbit = firstbit
+        self._sck = sck
+        self._mosi = mosi
+        self._miso = miso
+
+    def deinit(self) -> None:
+        ...
+
+    """Read a number of bytes specified by nbytes while continuously writing the single byte given by write. 
+    Returns a bytes object with the data that was read."""
+    def read(self, nbytes: int, write: int = 0x00) -> bytes:
+        if nbytes is None or nbytes == 0:
+            raise ValueError("Nbytes invalid {}").format(nbytes)
+        if self._generator.has_next():
+            return self._generator.next().payload[0:nbytes]
+        else:
+            return None
+
+    """    Read into the buffer specified by buf while continuously writing the single byte given by write. Returns None.
+    Note: on WiPy this function returns the number of bytes read."""
+    def readinto(self, buf, write: int = 0x00):
+        if buf is None or len(buf) == 0:
+            raise ValueError("Buffer invalid {}").format(buf)
+        reading = self.read(nbytes=len(buf))
+        for i in range(len(buf)):
+            buf[i] = reading[i]
+
+    """    Write the bytes contained in buf. Returns None.
+    Note: on WiPy this function returns the number of bytes written."""
+    def write(self, buf: bytes):
+        if buf is None or len(buf) == 0:
+            raise ValueError("Nbytes invalid {}").format(buf)
+        if buf.__class__ not in (bytearray, bytes, str):
+            raise ValueError("Buf must be bytearray, bytes or string but is {}".format(buf.__class__))
+        clone = bytearray(len(buf))
+        clone[:] = buf[:]
+        self.record_message(message=clone)
+
+    """    Write the bytes from write_buf while reading into read_buf. The buffers can be the same or different, 
+    but both buffers must have the same length. Returns None.
+    Note: on WiPy this function returns the number of bytes written."""
+    def write_readinto(self, write_buf, read_buf):
+        ...
+
+
+class I2C(Bus):
+
+    def __init__(self, id, scl, sda, freq=400000):
+        super().__init__()
+        self.id = id
+        self.scl = scl
+        self.sda = sda
+        self.freq = freq
 
     '''Read nbytes from the peripheral specified by addr. If stop is true then a STOP condition is generated at the end of the transfer.
        Returns a bytes object with the data read.'''
     def readfrom(self, addr, nbytes, stop=True) -> bytes:
         if nbytes is None or nbytes < 0:
             raise ValueError("Nbytes invalid {}").format(nbytes)
-        if self._generator is not None:
-            return self._generator.next(addr).payload[0:nbytes]
+        if self._generator.has_next(addr=addr):
+            return self._generator.next(addr=addr).payload[0:nbytes]
         else:
-            return self.get_current_message(addr).payload[0:nbytes]
+            return self.get_current_message(addr=addr).payload[0:nbytes]
 
     """Read into buf from the peripheral specified by addr. The number of bytes read will be the length of buf.
        If stop is true then a STOP condition is generated at the end of the transfer. The method returns None."""
@@ -178,10 +249,10 @@ class I2C:
        from buf then the remaining bytes are not sent. If stop is true then a STOP condition is generated at the end of 
        the transfer, even if a NACK is received. The function returns the number of ACKs that were received."""
     def writeto(self, addr, buf, stop=True) -> int:
-        if buf.__class__ not in (bytearray, bytes, str):
-            raise ValueError("Buf must be bytearray, bytes or string")
         if buf is None or len(buf) == 0:
             raise ValueError("Nbytes invalid {}").format(buf)
+        if buf.__class__ not in (bytearray, bytes, str):
+            raise ValueError("Buf must be bytearray, bytes or string")
         message = None
         ack_count = 0
         if buf.__class__ in (bytearray, bytes):
@@ -192,7 +263,7 @@ class I2C:
         if buf.__class__ is str:
             message = buf
             ack_count = 1
-        self.record_message(addr, message)
+        self.record_message(addr=addr, message=message)
         return ack_count
 
     """Write the bytes contained in vector to the peripheral specified by addr. vector should be a tuple or list of 
