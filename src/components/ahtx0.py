@@ -26,9 +26,6 @@ class AHTX0:
     def __init__(self, i2c: I2C):
         self.i2c = i2c
         self._measurement = bytearray(6)
-        self.reset()
-        if not self.check_status(IS_CALIBRATED):
-            self.calibrate()
 
     def reset(self) -> None:
         self.i2c.writeto(I2C_ADDRESS, RESET_COMMAND)
@@ -37,8 +34,9 @@ class AHTX0:
     def check_status(self, status) -> bool:
         return self.i2c.readfrom(I2C_ADDRESS, 1)[0] & status == status
 
-    def calibrate(self) -> None:
-        self.i2c.writeto(I2C_ADDRESS, CALIBRATE_COMMAND)
+    def calibrate(self, force: bool = False) -> None:
+        if not self.check_status(IS_CALIBRATED) or force:
+            self.i2c.writeto(I2C_ADDRESS, CALIBRATE_COMMAND)
 
     """Take a measurement. This must be called prior to 'read()'"""
     def measure(self) -> None:

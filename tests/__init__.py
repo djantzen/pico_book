@@ -10,3 +10,4 @@ from .models.traffic_light_test import TrafficLightTest
 from .components.pir_sensor_test import PirSensorTest
 from .components.ahtx0_test import AHTX0Test
 from .components.esp32.control_test import ControlTest
+from .models.env_monitor_test import EnvMonitorTest

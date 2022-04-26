@@ -42,7 +42,7 @@ class ClockTower:
     def not_yet(self, duration_in_seconds, caller: str = "global"):
         calling_thread = _thread.get_ident()
         caller_id = str(calling_thread) + ':' + caller
-        if calling_thread not in self.not_yets:
+        if caller_id not in self.not_yets:
             self.not_yets[caller_id] = self.now
             return True
         else:

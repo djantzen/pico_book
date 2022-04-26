@@ -21,7 +21,7 @@ ready_pin = pico.reserve_pin(pico.gp7)
 
 spi = pico.spi(id=1, sck=sck_pin, mosi=mosi_pin, miso=miso_pin)
 
-esp = components.esp32.Control(spi=spi, gpio0_pin=gpio0_pin, ready_pin=ready_pin, reset_pin=reset_pin, cs_pin=cs_pin, debug=3)
+esp = components.esp32.Control(spi=spi, gpio0_pin=gpio0_pin, ready_pin=ready_pin, reset_pin=reset_pin, cs_pin=cs_pin, debug=1)
 requests.set_interface(esp)
 wifi = components.esp32.WiFiManager(esp=esp, secrets=secrets, status_pixel=None)
 
