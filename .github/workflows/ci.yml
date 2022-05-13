@@ -27,4 +27,4 @@ jobs:
         micropython -m upip install unittest
     - name: Run Tests
       run: |
-        micropython run_tests.sh
+        micropython run_tests.py
