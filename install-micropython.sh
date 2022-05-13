@@ -6,6 +6,8 @@ cd micropython/mpy-cross
 make
 
 cd ../ports/unix
+
+# Default unix build does not include uasyncio: https://github.com/micropython/micropython/issues/6109
 echo "
 freeze(
     \"\$(MPY_DIR)/extmod\",

@@ -2,7 +2,13 @@ from models import EnvMonitor
 from singletons import ClockTower
 import uasyncio
 
-er = EnvMonitor()
+try:
+    from secrets import secrets
+except ImportError:
+    print("WiFi secrets are kept in $ROOT/secrets.py, please add them there!")
+    raise
+
+er = EnvMonitor(secrets=secrets)
 er.initialize()
 #runtime = int(input("Run for how many seconds?"))
 

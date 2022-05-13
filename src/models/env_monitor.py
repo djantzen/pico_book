@@ -5,12 +5,7 @@ import uasyncio
 
 class EnvMonitor:
 
-    def __init__(self):
-        try:
-            from secrets import secrets
-        except ImportError:
-            print("WiFi secrets are kept in $ROOT/secrets.py, please add them there!")
-            raise
+    def __init__(self, secrets):
 
         pico = Pico.instance()
         cs_pin = pico.reserve_pin(pico.gp9, "ESP CS")
