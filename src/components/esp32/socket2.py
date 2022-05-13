@@ -110,8 +110,7 @@ class socket:
             self._buffer = b''
             gc.collect()
             return ret
-        # stamp = time.monotonic()
-        stamp = ClockTower.instance().now
+        stamp = time.time()
 
         to_read = size - len(self._buffer)
         received = []

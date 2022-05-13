@@ -32,7 +32,11 @@ class AHTX0:
         ClockTower.instance().sleep(0.04)
 
     def check_status(self, status) -> bool:
-        return self.i2c.readfrom(I2C_ADDRESS, 1)[0] & status == status
+        try:
+            return self.i2c.readfrom(I2C_ADDRESS, 1)[0] & status == status
+        except OSError as e:
+            print("Caught {}".format(e))
+            return False
 
     def calibrate(self, force: bool = False) -> None:
         if not self.check_status(IS_CALIBRATED) or force:
@@ -40,7 +44,10 @@ class AHTX0:
 
     """Take a measurement. This must be called prior to 'read()'"""
     def measure(self) -> None:
-        self.i2c.writeto(I2C_ADDRESS, MEASURE_COMMAND)
+        try:
+            self.i2c.writeto(I2C_ADDRESS, MEASURE_COMMAND)
+        except OSError as e:
+            print("OSError {}".format(e))
         while self.check_status(IS_BUSY):
             ClockTower.instance().sleep(0.1)
         self._measurement = self.i2c.readfrom(I2C_ADDRESS, 7)
