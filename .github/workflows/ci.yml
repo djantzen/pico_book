@@ -28,7 +28,7 @@ jobs:
         micropython -m upip install unittest
     - name: Run Tests
       run: |
-        micropython run_tests.py && ls
+        micropython run_tests.py && sleep 3 && ls
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
