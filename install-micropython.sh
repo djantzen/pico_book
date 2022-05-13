@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 cd /tmp
-#git clone https://github.com/micropython/micropython.git
+git clone https://github.com/micropython/micropython.git
 cd micropython/mpy-cross
 make
 
