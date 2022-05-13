@@ -13,7 +13,8 @@ permissions:
   contents: read
 
 jobs:
-  build-and-test:
+  run-tests:
+    name: "Run Tests"
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -33,4 +34,4 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
       with:
-        files: "*.xml"
+        files: "tests.xml"
