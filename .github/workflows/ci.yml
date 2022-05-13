@@ -1,0 +1,29 @@
+# This workflow will install MicroPython and dependencies and run tests
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name:  Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install MicroPython
+      run: |
+        ./install-micropython.sh
+    - name: Install Dependencies
+      run: |
+        micropython -m upip install unittest
+    - name: Run Tests
+      run: |
+        micropython run_tests.sh
