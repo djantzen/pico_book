@@ -25,10 +25,10 @@ jobs:
         ./install-micropython.sh
     - name: Install Dependencies
       run: |
-        micropython -m upip install unittest
+        git clone https://gitlab.com/alelec/micropython_unittest_junit.git /home/runner/.micropython/lib
     - name: Run Tests
       run: |
-        micropython run_tests.py && sleep 3 && ls
+        micropython run_tests.py
     - name: Publish Unit Test Results
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
